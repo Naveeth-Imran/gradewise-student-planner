@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Marks Prediction</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a class="brand" href="{{ url_for('home') }}">
+            <span class="brand-icon">🎓</span>
+            <span>Student<span class="brand-highlight">Predict</span></span>
+        </a>
+
+        <div class="nav-links">
+            <a class="active" href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('planner') }}">Study Planner</a>
+            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('performance') }}">Model Performance</a>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="hero">
+            <div class="hero-badge">
+                <span class="status-dot"></span>
+                MACHINE LEARNING POWERED
+            </div>
+
+            <h1>Predict your <span>academic success.</span></h1>
+
+            <p>
+                Discover your expected marks based on your study hours.
+                Plan smarter, track your progress, and achieve your goals.
+            </p>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="dashboard-grid">
+            <div class="card prediction-card">
+                <div class="card-heading">
+                    <div class="heading-icon">📊</div>
+                    <div>
+                        <h2>Marks Predictor</h2>
+                        <p>Enter your study details below.</p>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('home') }}">
+                    <div class="form-group">
+                        <label for="hours">Daily study hours</label>
+                        <div class="input-wrap">
+                            <span>⏱️</span>
+                            <input
+                                type="number"
+                                id="hours"
+                                name="hours"
+                                min="0"
+                                max="24"
+                                step="0.5"
+                                placeholder="e.g. 5"
+                                value="{{ request.form.get('hours', '') }}"
+                                required>
+                        </div>
+                        <small>How many hours do you study per day?</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="target">Target marks (%)</label>
+                        <div class="input-wrap">
+                            <span>🎯</span>
+                            <input
+                                type="number"
+                                id="target"
+                                name="target"
+                                min="0"
+                                max="100"
+                                step="1"
+                                placeholder="e.g. 85"
+                                value="{{ request.form.get('target', '80') }}"
+                                required>
+                        </div>
+                        <small>Set the marks you want to achieve.</small>
+                    </div>
+
+                    <button class="primary-btn" type="submit">
+                        Predict My Marks <span>→</span>
+                    </button>
+                </form>
+
+                <div class="privacy-note">
+                    ✨ Results are estimates from your trained ML model.
+                </div>
+            </div>
+
+            <div class="card result-card">
+                <div class="result-top">
+                    <span class="result-label">YOUR ACADEMIC JOURNEY</span>
+                    <span class="result-emoji">🚀</span>
+                </div>
+
+                {% if prediction is defined and prediction is not none %}
+                    <div class="result-content">
+                        <p class="result-caption">Predicted marks</p>
+                        <div class="score">
+                            {{ "%.1f"|format(prediction) }}<span>/100</span>
+                        </div>
+
+                        {% if target is defined and target is not none %}
+                            {% set progress = [[(prediction / target * 100) if target > 0 else (100 if prediction >= 0 else 0), 100]|min, 0]|max %}
+                            <div class="progress-heading">
+                                <span>Progress towards target</span>
+                                <strong>{{ "%.0f"|format(progress) }}%</strong>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-fill"
+                                     style="width: {{ progress }}%"></div>
+                            </div>
+
+                            {% if prediction >= target %}
+                                <p class="result-message">
+                                    🎉 Great! Your prediction meets your target.
+                                </p>
+                            {% else %}
+                                <p class="result-message">
+                                    💪 Keep practising to reach your target.
+                                </p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="empty-result">
+                        <div class="illustration">📚</div>
+                        <h2>Your future starts here.</h2>
+                        <p>
+                            Enter your study hours and click Predict
+                            to see your estimated marks.
+                        </p>
+                    </div>
+                {% endif %}
+
+                <div class="result-features">
+                    <div>
+                        <span class="feature-icon blue">⚡</span>
+                        <strong>Instant</strong>
+                        <small>Quick predictions</small>
+                    </div>
+                    <div>
+                        <span class="feature-icon purple">🧠</span>
+                        <strong>ML Powered</strong>
+                        <small>Data-based estimates</small>
+                    </div>
+                    <div>
+                        <span class="feature-icon green">📈</span>
+                        <strong>Goal Focused</strong>
+                        <small>Track your targets</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-heading">
+            <div>
+                <span class="eyebrow">YOUR LEARNING TOOLKIT</span>
+                <h2>Everything you need to improve</h2>
+                <p>Turn your study routine into measurable progress.</p>
+            </div>
+        </section>
+
+        <section class="tools-grid">
+            <a class="tool-card" href="{{ url_for('planner') }}">
+                <div class="tool-icon planner-icon">🗓️</div>
+                <h3>Study Planner</h3>
+                <p>Create a simple study schedule with focused time slots.</p>
+                <span class="tool-link">Plan your day →</span>
+            </a>
+
+            <a class="tool-card" href="{{ url_for('history') }}">
+                <div class="tool-icon history-icon">🕘</div>
+                <h3>Prediction History</h3>
+                <p>Review previous predictions saved by your application.</p>
+                <span class="tool-link">View history →</span>
+            </a>
+
+            <a class="tool-card" href="{{ url_for('performance') }}">
+                <div class="tool-icon performance-icon">📊</div>
+                <h3>Model Performance</h3>
+                <p>Compare the machine-learning models used in your project.</p>
+                <span class="tool-link">Explore results →</span>
+            </a>
+        </section>
+
+        <section class="graph-card">
+            <div class="graph-heading">
+                <div>
+                    <span class="eyebrow">DATA INSIGHTS</span>
+                    <h2>Study hours vs marks</h2>
+                    <p>Visualise the relationship in your training dataset.</p>
+                </div>
+                <span class="graph-badge">📈 ML Insights</span>
+            </div>
+
+            <img
+                class="prediction-graph"
+                src="{{ url_for('static', filename='prediction_graph.png') }}"
+                alt="Graph showing the relationship between study hours and marks"
+                onerror="this.style.display='none';
+                         document.getElementById('graph-fallback').style.display='block';">
+
+            <p id="graph-fallback" class="graph-fallback" style="display:none;">
+                The graph isn't available yet. Run train_model.py to generate it.
+            </p>
+        </section>
+
+        <footer class="footer">
+            <p>🎓 StudentPredict</p>
+            <span>Built with Python, Flask & Machine Learning</span>
+            <small>Predictions are estimates, not guaranteed exam results.</small>
+        </footer>
+    </main>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Study Planner | GradeWise</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/">GradeWise</a>
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/planner">Study Planner</a>
+        <a href="/history">History</a>
+        <a href="/performance">ML Performance</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <p class="eyebrow">STUDY SMARTER</p>
+        <h1>Your study <span>planner.</span></h1>
+        <p class="subtitle">
+            Create a simple study rotation for the subjects you enter.
+        </p>
+    </section>
+
+    <section class="panel narrow">
+        <h2>Build your timetable</h2>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <label for="available_hours">Available hours per day</label>
+            <input id="available_hours" name="available_hours"
+                   type="number" min="0.5" max="12" step="0.5"
+                   value="{{ request.form.get('available_hours', available_hours) }}" required>
+
+            <label for="subjects">Subjects, separated by commas</label>
+            <input id="subjects" name="subjects" type="text"
+                   value="{{ request.form.get('subjects', '') }}"
+                   placeholder="Maths, Python, Statistics" required>
+
+            <button type="submit">Generate study plan →</button>
+        </form>
+
+        {% if plan %}
+        <h2 class="section-gap">Your study rotation</h2>
+        <p class="muted">
+            Each slot is 30 minutes. The timetable uses the subjects
+            in the order you entered them.
+        </p>
+
+        <div class="plan-list">
+            {% for slot in plan %}
+            <div class="plan-row">
+                <span class="time">{{ slot["time"] }}</span>
+                <strong>{{ slot["subject"] }}</strong>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+
+    <p class="disclaimer">
+        This is a simple planning aid. Add breaks and adjust the schedule
+        to your own needs.
+    </p>
+</main>
+<footer><a href="/">← Back to dashboard</a></footer>
+</body>
+</html>

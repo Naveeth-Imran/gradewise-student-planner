@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ML Performance | GradeWise</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="/">GradeWise</a>
+    <nav>
+        <a href="/">Dashboard</a>
+        <a href="/planner">Study Planner</a>
+        <a href="/history">History</a>
+        <a href="/performance">ML Performance</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="hero">
+        <p class="eyebrow">MODEL EVALUATION</p>
+        <h1>Explore the <span>algorithms.</span></h1>
+        <p class="subtitle">
+            Compare prediction errors using a held-out portion
+            of the dataset.
+        </p>
+    </section>
+
+    <section class="panel">
+        <h2>Study hours vs marks</h2>
+        {% if chart_exists %}
+        <img class="chart" src="{{ url_for('static', filename='performance.png') }}?v=1"
+             alt="Study hours and marks prediction chart">
+        {% else %}
+        <p class="muted">The chart could not be created. Check students.csv.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel section-gap">
+        <h2>Algorithm comparison</h2>
+        <p class="muted">
+            Lower MAE means lower average absolute error.
+            R² measures fit on this test sample and can be negative.
+        </p>
+
+        {% if models %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Algorithm</th>
+                        <th>MAE</th>
+                        <th>R²</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in models %}
+                    <tr>
+                        <td>{{ item["name"] }}</td>
+                        <td>{{ item["mae"] }}</td>
+                        <td>{{ item["r2"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="muted">
+            Not enough valid data to compare models. Add at least five
+            valid records with different study-hour values to students.csv.
+        </p>
+        {% endif %}
+    </section>
+
+    <p class="disclaimer">
+        A small illustrative dataset can produce unstable scores.
+        Use a larger representative dataset for meaningful evaluation.
+    </p>
+</main>
+<footer><a href="/">← Back to dashboard</a></footer>
+</body>
+</html>
